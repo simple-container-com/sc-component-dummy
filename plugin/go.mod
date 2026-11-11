@@ -1,6 +1,6 @@
 module github.com/simple-container-com/sc-component-dummy/plugin
 
-go 1.26.10
+go 1.26.11
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -156,4 +156,3 @@ require (
 // once we're past bootstrap; this replace line keeps `go build ./...`
 // working against the un-released /api module in the meantime.
 replace github.com/simple-container-com/sc-component-dummy/api => ../api
-

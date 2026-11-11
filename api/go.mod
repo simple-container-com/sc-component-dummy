@@ -1,6 +1,6 @@
 module github.com/simple-container-com/sc-component-dummy/api
 
-go 1.26.10
+go 1.26.11
 
 // TODO: once slice 1a of sc-components-platform lands in SC api (adding
 // SchemaResponse.component_resource_types + ComponentConfig reader +
@@ -141,4 +141,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.5.1 // indirect
 )
-
