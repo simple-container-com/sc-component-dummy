@@ -82,7 +82,7 @@ jobs:
           GOMAXPROCS: '1'
           GOMEMLIMIT: '6GiB'
         run: |
-          out=sc-plugin-dummy-${GOOS}-${GOARCH}
+          out=sc-component-dummy-${GOOS}-${GOARCH}
           go build -trimpath -buildvcs=false -p 1 \
             -ldflags "-s -w -X main.version=${VERSION}" \
             -o "../${out}" \
@@ -95,7 +95,7 @@ jobs:
         with:
           name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
-            sc-plugin-dummy-${{ matrix.goos }}-${{ matrix.goarch }}*
+            sc-component-dummy-${{ matrix.goos }}-${{ matrix.goarch }}*
 
   release:
     name: Publish Release
@@ -116,8 +116,8 @@ jobs:
       - name: Build consolidated sha256sums.txt
         working-directory: dist
         run: |
-          cat sc-plugin-dummy-*.sha256 > sha256sums.txt
-          rm sc-plugin-dummy-*.sha256
+          cat sc-component-dummy-*.sha256 > sha256sums.txt
+          rm sc-component-dummy-*.sha256
           cat sha256sums.txt
 
       - name: Tag commit if from main
