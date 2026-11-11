@@ -1,0 +1,73 @@
+schemaVersion: 1.0
+
+# Throwaway smoke parent stack for slice 1a of sc-components-platform.
+# ONE host (host 3 of sc-ru-clouds's rig), NO Cloudflare, NO ingress.enable.
+# The dummy service binds to a high port on the host and we reach it by
+# IP:port. Operator-decided DNS-free + no-publish; sc-components session
+# runs this locally only.
+
+plugins:
+  # The slice 1a plugin binary, locally-built. PluginSpec.Path (top-level,
+  # not inside source:) skips the GitHub-release fetcher entirely and
+  # executes the local binary.
+  dummy:
+    path: /tmp/sc-plugin-dummy-linux-amd64
+
+provisioner:
+  type: pulumi
+  config:
+    organization: organization
+    state-storage:
+      type: fs
+      config:
+        path: ${git:root}/.sc/state
+    secrets-provider:
+      type: passphrase
+      config:
+        passPhrase: ${secret:SC_STATE_PASSPHRASE}
+
+templates:
+  # One template: vm-compose on host 3. ingress.enable: false on the vm
+  # resource below means Caddy is NOT installed on the host; the service
+  # publishes its own port directly.
+  compose-on-vm:
+    type: vm-compose
+    config:
+      vmResource: smoke-vm
+      imageDelivery: registry
+      dockerRegistryURL: docker.io
+      externalImages: pull
+      strategy: blue-green
+      keepImages: 3
+
+resources:
+  # No registrars block — DNS-free smoke per operator decision.
+  resources:
+    smoke:
+      template: compose-on-vm
+      resources:
+        smoke-vm:
+          type: vm
+          config:
+            provider: byo
+            hosts:
+              - address: 77.246.99.14
+                user: root
+                port: 22
+                role: compose
+                privateKey: ${secret:SMOKE_DEPLOY_KEY}
+                hostKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFtlPcJ6MAgwJuXLMsKCrhULh8hgQBqOp+lAto4d+G4i"
+            ingress:
+              enable: false
+        # The slice 1a dummy component. SC core's sidecar wrapper
+        # (feat/sc-component-dispatch) sees sc-dummy in
+        # ComponentResourceTypes, reads config.deployTo via .Raw, looks
+        # up compose-on-vm in templates: above, merges plugin overrides
+        # (image) over the template config, and dispatches
+        # ProvisionFuncByType[vm-compose] with the merged input.
+        my-dummy:
+          type: sc-dummy
+          config:
+            deployTo: compose-on-vm
+            image: simplecontainer/sc-component-dummy:smoke-local
+            signingKey: ${secret:SMOKE_SIGNING_KEY}

@@ -1,0 +1,3 @@
+projectName: sc-component-dummy-smoke
+privateKeyPath: ~/.ssh/id_rsa
+publicKeyPath: ~/.ssh/id_rsa.pub

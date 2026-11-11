@@ -1,0 +1,31 @@
+# Smoke-only Dockerfile — skips the React SPA build stage (the placeholder
+# internal/ui/dist/index.html is embedded as-is). Used for the slice 1a
+# first-smoke, which exercises the HTTP API only. For a real release,
+# use Dockerfile (the multi-stage one with ui-builder).
+ARG GOLANG_VERSION=1.26-alpine
+ARG RUNTIME_BASE=public.ecr.aws/lambda/provided:al2023
+
+FROM golang:${GOLANG_VERSION} AS go-builder
+RUN apk add --no-cache ca-certificates git
+WORKDIR /src
+
+# For smoke: copy everything + rely on replace directives in go.mod.
+COPY . .
+
+ARG VERSION=smoke
+ARG COMMIT=smoke
+ARG REVISION=smoke
+RUN CGO_ENABLED=0 GOOS=linux go build \
+      -trimpath -buildvcs=false \
+      -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.revision=${REVISION}" \
+      -o /out/dummy \
+      ./cmd/dummy
+
+FROM alpine:3.20
+RUN apk add --no-cache ca-certificates
+COPY --from=go-builder /out/dummy /dummy
+# non-root per the project's pattern
+RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
+USER app:app
+EXPOSE 8080
+ENTRYPOINT ["/dummy"]
