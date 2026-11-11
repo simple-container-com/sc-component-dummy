@@ -11,7 +11,7 @@ go 1.26.10
 require (
 	github.com/onsi/gomega v1.44.0
 	github.com/pkg/errors v0.9.1
-	github.com/simple-container-com/api v0.0.0-20261102142605-7a84b47744bf
+	github.com/simple-container-com/api v0.0.0-20261111190836-60bb46dc2d06
 )
 
 require (
@@ -142,7 +142,3 @@ require (
 	lukechampine.com/frand v1.5.1 // indirect
 )
 
-// Local dev replace onto the slice-1a-carrying api feature branch. Until
-// slice 1a merges + a release is cut, this api module builds against the
-// working tree.
-replace github.com/simple-container-com/api => /home/iasadykov/projects/github/simple-container/api
